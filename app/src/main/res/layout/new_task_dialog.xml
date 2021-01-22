@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/submit_button_gradient"
+        android:text="Save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/priorityForNewTask"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="0dp"
+        android:layout_height="90dp"
+        android:background="@drawable/topgradient"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="310dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="New Task"
+            android:textColor="#FFFFFF"
+            android:textSize="30sp" />
+    </FrameLayout>
+
+    <EditText
+        android:id="@+id/titleForNewTask"
+        android:layout_width="wrap_content"
+        android:layout_height="64dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/transparent"
+        android:ems="10"
+        android:hint="Title"
+        android:inputType="textPersonName"
+        android:minWidth="336dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/frameLayout" />
+
+    <EditText
+        android:id="@+id/descriptionForNewTask"
+        android:layout_width="wrap_content"
+        android:layout_height="64dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/transparent"
+        android:ems="10"
+        android:gravity="start|top"
+        android:hint="Description"
+        android:inputType="textMultiLine"
+        android:minWidth="336dp"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleForNewTask" />
+
+    <RadioGroup
+        android:id="@+id/priorityForNewTask"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider4">
+
+        <RadioButton
+            android:id="@+id/radioButtonLow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/stripesgreensmal"
+            android:buttonTint="@android:color/holo_blue_dark"
+            android:checked="true"
+            android:fallbackLineSpacing="false"
+            android:scaleType="center"
+            android:text="LOW"
+            android:textStyle="bold" />
+
+        <RadioButton
+            android:id="@+id/radioButtonMedium"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/stripesorangesmal"
+            android:buttonTint="@android:color/holo_blue_dark"
+            android:text="MEDIUM"
+            android:textStyle="bold" />
+
+        <RadioButton
+            android:id="@+id/radioButtonHigh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/stripesredsmal"
+            android:buttonTint="@android:color/holo_blue_dark"
+            android:text="HIGH"
+            android:textStyle="bold" />
+    </RadioGroup>
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="16dp"
+        android:divider="@android:color/black"
+        app:layout_constraintEnd_toEndOf="@+id/priorityForNewTask"
+        app:layout_constraintStart_toStartOf="@+id/priorityForNewTask"
+        app:layout_constraintTop_toBottomOf="@+id/priorityForNewTask" />
+
+    <View
+        android:id="@+id/divider4"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="32dp"
+        android:divider="@android:color/holo_green_dark"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="@+id/descriptionForNewTask"
+        app:layout_constraintStart_toStartOf="@+id/descriptionForNewTask"
+        app:layout_constraintTop_toBottomOf="@+id/descriptionForNewTask"
+        tools:visibility="visible" />
+
+    <View
+        android:id="@+id/divider5"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="32dp"
+        android:divider="@android:color/black"
+        app:layout_constraintEnd_toEndOf="@+id/titleForNewTask"
+        app:layout_constraintStart_toStartOf="@+id/titleForNewTask"
+        app:layout_constraintTop_toBottomOf="@+id/titleForNewTask" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

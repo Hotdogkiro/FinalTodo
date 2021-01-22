@@ -1,0 +1,47 @@
+package com.example.todo_app.activitys
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.fragment.app.DialogFragment
+import com.example.todo.R
+
+class NewTaskDialog : DialogFragment() {
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.new_task_dialog, container)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setup(view)
+    }
+
+    private fun setup(view: View) {
+        val save = view.findViewById<View>(R.id.saveButton)
+        save.setOnClickListener {
+            checkForMissingInputs(view)
+        }
+    }
+
+    private fun checkForMissingInputs(view : View){
+        if(view.findViewById<TextView>(R.id.titleForNewTask).text == ""){
+            displayError()
+        }else{
+            saveNewTask()
+        }
+    }
+    private fun saveNewTask() {
+
+    }
+
+    private fun displayError(){
+
+    }
+}
