@@ -1,7 +1,6 @@
 package com.example.todo_app.activitys
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.security.keystore.KeyGenParameterSpec
@@ -13,16 +12,20 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.R
-import com.example.todo.model.RecyclerViewItem
-import com.example.todo.model.Status
-import com.example.todo.model.Task
+import com.example.todo_app.model.Importance
+import com.example.todo_app.model.RecyclerViewItem
+import com.example.todo_app.model.Status
+import com.example.todo_app.model.Task
+import com.orm.SchemaGenerator
+import com.orm.SugarContext
+import com.orm.SugarDb
+import com.orm.SugarRecord.listAll
 import java.nio.charset.Charset
 import java.security.KeyStore
 import java.util.*
@@ -30,7 +33,6 @@ import java.util.concurrent.Executor
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import kotlin.coroutines.coroutineContext
 
 
 class MainActivity : AppCompatActivity() {
@@ -44,6 +46,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.authentication_page)
+        SugarContext.init(applicationContext)
+        val schemaGenerator = SchemaGenerator(this)
+        schemaGenerator.createDatabase(SugarDb(this).getDB())
         setup(applicationContext, this)
     }
 
@@ -58,13 +63,14 @@ class MainActivity : AppCompatActivity() {
         val todo = findViewById<View>(R.id.todo) as Button
         val inProgress = findViewById<View>(R.id.inProgress) as Button
         val done = findViewById<View>(R.id.done) as Button
-        val onClickListener = View.OnClickListener() {
+        val onClickListener = View.OnClickListener {
             it as Button
             if (it == todo) {
                 currentStatus = Status.TODO
             }
             if (it == inProgress) {
                 currentStatus = Status.INPROGRESS
+
             }
             if (it == done) {
                 currentStatus = Status.DONE
@@ -74,7 +80,6 @@ class MainActivity : AppCompatActivity() {
             done.setTextColor(Color.WHITE)
             it.paintFlags = it.paintFlags
             it.setTextColor(Color.CYAN)
-            setupRecyclerView(TaskAdapter(filterTasksByStatus(currentStatus, allTasks), this, this))
         }
         todo.setOnClickListener(onClickListener)
         inProgress.setOnClickListener(onClickListener)
@@ -105,9 +110,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun authenticationSuccessful(){
         setContentView(R.layout.activity_main)
-        allTasks = createTasks(20)
+        allTasks = loadTasks()
         val currentTasks = filterTasksByStatus(currentStatus, allTasks)
-        val adapter = TaskAdapter(currentTasks, this, this)
+        val adapter = TaskAdapter(currentTasks, this)
         setupRecyclerView(adapter)
         actionsToMenu()
         actionToFAB()
@@ -119,13 +124,15 @@ class MainActivity : AppCompatActivity() {
         newTaskDialog.show(fm, "new_task_dialog")
     }
 
-    fun createTasks(amount: Int): MutableList<RecyclerViewItem> {
-        var list = mutableListOf<RecyclerViewItem>()
-        for (i in 1..amount / 4) {
-            list.add(Task(title = "Number$i ${Status.DONE}", status = Status.DONE))
-            list.add(Task(title = "Number$i ${Status.INPROGRESS}", status = Status.INPROGRESS))
-        }
-        return list
+    fun loadTasks(): MutableList<RecyclerViewItem> {
+      //  try {
+            val tasks: List<Task> = listAll(Task::class.java)
+            return tasks.toMutableList()
+        //}catch (e : android.database.sqlite.SQLiteException){
+          //  val task = Task("Create New TODOs","Use the Icon on the bottom left to create new TODOs", Importance.MEDIUM)
+            //task.save()
+        //}
+       // return loadTasks()
     }
 
     private fun setup(context: Context, fragment: FragmentActivity) {
@@ -137,10 +144,6 @@ class MainActivity : AppCompatActivity() {
                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
                 .setUserAuthenticationRequired(true)
-                // Invalidate the keys if the user has registered a new biometric
-                // credential, such as a new fingerprint. Can call this method only
-                // on Android 7.0 (API level 24) or higher. The variable
-                // "invalidatedByBiometricEnrollment" is true by default.
                 .setInvalidatedByBiometricEnrollment(true)
                 .build()
         )

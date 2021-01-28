@@ -16,7 +16,7 @@ import com.example.todo_app.model.Task
 import com.google.android.material.snackbar.Snackbar
 
 
-class TaskAdapter(private val tasksInCurrentList:  MutableList<RecyclerViewItem>, val context: Context, val mainActivity: MainActivity) :
+class TaskAdapter(private val tasksInCurrentList:  MutableList<RecyclerViewItem>, val mainActivity: MainActivity) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     inner class ViewHolder(listItemView: View) : RecyclerView.ViewHolder(listItemView) {

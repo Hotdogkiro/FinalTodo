@@ -4,16 +4,15 @@ import android.graphics.Color
 import android.graphics.drawable.Icon
 import androidx.core.graphics.toColor
 import com.example.todo.R
+import com.orm.SugarRecord
 import org.w3c.dom.Entity
 import java.time.LocalDate
 import java.util.*
 
-data class Category(val name : String, val icon: Icon)
-
-data class Task(val title: String, val importance: Importance = Importance.MEDIUM, val description: String = "", val status : Status = Status.TODO) : RecyclerViewItem(){
+data class Task(val title: String, val description: String = "", val importance: Importance = Importance.MEDIUM, val status : Status = Status.TODO) : RecyclerViewItem() {
 
 }
-open class RecyclerViewItem(){
+open class RecyclerViewItem() : SugarRecord(){
 }
 
 
