@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.R
-import com.example.todo_app.model.Importance
 import com.example.todo_app.model.RecyclerViewItem
 import com.example.todo_app.model.Status
 import com.example.todo_app.model.Task
@@ -49,7 +48,8 @@ class MainActivity : AppCompatActivity() {
         SugarContext.init(applicationContext)
         val schemaGenerator = SchemaGenerator(this)
         schemaGenerator.createDatabase(SugarDb(this).getDB())
-        setup(applicationContext, this)
+       // setup(applicationContext, this)
+        setupWithoutBiometric()
     }
 
     private fun actionToFAB() {
@@ -133,6 +133,11 @@ class MainActivity : AppCompatActivity() {
             //task.save()
         //}
        // return loadTasks()
+    }
+
+
+    private fun setupWithoutBiometric(){
+        authenticationSuccessful()
     }
 
     private fun setup(context: Context, fragment: FragmentActivity) {
