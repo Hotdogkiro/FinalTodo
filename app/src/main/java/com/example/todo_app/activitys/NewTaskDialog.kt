@@ -1,6 +1,7 @@
 package com.example.todo_app.activitys
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +19,7 @@ class NewTaskDialog : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (container != null) {
-            SugarContext.init(container.context)
+            SugarContext.init(this.context)
         }
         return inflater.inflate(R.layout.new_task_dialog, container)
     }
@@ -47,6 +48,8 @@ class NewTaskDialog : DialogFragment() {
         val description : String = view.findViewById<TextView>(R.id.descriptionForNewTask).text.toString()
         val title : String = view.findViewById<TextView>(R.id.titleForNewTask).text.toString()
         val task = Task(title,description,importance)
+
+        Log.d("test",title)
         task.save()
         this.dismiss()
     }

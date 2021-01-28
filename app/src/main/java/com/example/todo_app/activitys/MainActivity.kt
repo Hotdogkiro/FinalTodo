@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.R
+import com.example.todo_app.model.Importance
 import com.example.todo_app.model.RecyclerViewItem
 import com.example.todo_app.model.Status
 import com.example.todo_app.model.Task
@@ -45,11 +46,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.authentication_page)
-        SugarContext.init(applicationContext)
-        val schemaGenerator = SchemaGenerator(this)
-        schemaGenerator.createDatabase(SugarDb(this).getDB())
-       // setup(applicationContext, this)
-        setupWithoutBiometric()
+        SugarContext.init(this)
+        val task = Task("Create New TODOs","Use the Icon on the bottom left to create new TODOs", Importance.MEDIUM)
+        task.save()
+        setup(applicationContext, this)
+        //setupWithoutBiometric()
     }
 
     private fun actionToFAB() {
@@ -124,17 +125,10 @@ class MainActivity : AppCompatActivity() {
         newTaskDialog.show(fm, "new_task_dialog")
     }
 
-    fun loadTasks(): MutableList<RecyclerViewItem> {
-      //  try {
-            val tasks: List<Task> = listAll(Task::class.java)
-            return tasks.toMutableList()
-        //}catch (e : android.database.sqlite.SQLiteException){
-          //  val task = Task("Create New TODOs","Use the Icon on the bottom left to create new TODOs", Importance.MEDIUM)
-            //task.save()
-        //}
-       // return loadTasks()
+    private fun loadTasks(): MutableList<RecyclerViewItem> {
+        val tasks: List<Task> = listAll(Task::class.java)
+        return tasks.toMutableList()
     }
-
 
     private fun setupWithoutBiometric(){
         authenticationSuccessful()
@@ -181,7 +175,6 @@ class MainActivity : AppCompatActivity() {
                                 Arrays.toString(encryptedInfo)
                     )
                     authenticationSuccessful()
-
                 }
 
                 override fun onAuthenticationFailed() {
