@@ -19,15 +19,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.R
 import com.example.todo_app.data.DatabaseReader
-import com.example.todo_app.model.Importance
-import com.example.todo_app.model.RecyclerViewItem
 import com.example.todo_app.model.Status
 import com.example.todo_app.model.Task
-import com.orm.SchemaGenerator
 import com.orm.SugarContext
-import com.orm.SugarDb
 import com.orm.SugarRecord
-import com.orm.SugarRecord.listAll
 import java.nio.charset.Charset
 import java.security.KeyStore
 import java.util.*
@@ -37,22 +32,29 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
 
-class MainActivity : AppCompatActivity() {
-    lateinit var allTasks: MutableList<RecyclerViewItem>
+interface ISelectedData {
+    fun onSelectedData(string: String)
+}
+
+class MainActivity : AppCompatActivity(),ISelectedData  {
+    lateinit var allTasks: MutableList<Task>
     var currentStatus: Status = Status.TODO
     private lateinit var executor: Executor
     private lateinit var biometricPrompt: BiometricPrompt
     private lateinit var promptInfo: BiometricPrompt.PromptInfo
-
+    private lateinit var databaseReader: DatabaseReader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.authentication_page)
         SugarContext.init(this)
-        val task = Task("Create New TODOs","Use the Icon on the bottom left to create new TODOs", Importance.MEDIUM)
-        task.save()
+        databaseReader = DatabaseReader(this)
         //setup(applicationContext, this)
         setupWithoutBiometric()
+    }
+
+    override fun onSelectedData(returnValue: String) {
+        refreshData()
     }
 
     private fun actionToFAB() {
@@ -64,6 +66,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun actionsToMenu() {
         val todo = findViewById<View>(R.id.todo) as Button
+        todo.setTextColor(Color.CYAN)
         val inProgress = findViewById<View>(R.id.inProgress) as Button
         val done = findViewById<View>(R.id.done) as Button
         val onClickListener = View.OnClickListener {
@@ -73,7 +76,6 @@ class MainActivity : AppCompatActivity() {
             }
             if (it == inProgress) {
                 currentStatus = Status.INPROGRESS
-
             }
             if (it == done) {
                 currentStatus = Status.DONE
@@ -83,6 +85,7 @@ class MainActivity : AppCompatActivity() {
             done.setTextColor(Color.WHITE)
             it.paintFlags = it.paintFlags
             it.setTextColor(Color.CYAN)
+            refreshData()
         }
         todo.setOnClickListener(onClickListener)
         inProgress.setOnClickListener(onClickListener)
@@ -97,31 +100,20 @@ class MainActivity : AppCompatActivity() {
         itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
-    private fun filterTasksByStatus(
-        currentStatus: Status,
-        tasksToFilter: MutableList<RecyclerViewItem>
-    ): MutableList<RecyclerViewItem> {
-        val currentTasks: MutableList<RecyclerViewItem> = mutableListOf()
-        tasksToFilter.forEach { recyclerViewItem ->
-            recyclerViewItem as Task
-            if (recyclerViewItem.status == currentStatus) {
-                currentTasks.add(recyclerViewItem)
-            }
-        }
-        return currentTasks
+    private fun refreshData(){
+        val currentTasks = databaseReader.readTasksWithStatus(currentStatus)
+        val adapter = TaskAdapter(currentTasks, this)
+        setupRecyclerView(adapter)
     }
 
     private fun authenticationSuccessful(){
         setContentView(R.layout.activity_main)
-        allTasks = loadAllManually()
-        //val databaseReader = DatabaseReader(this)
-        //allTasks = databaseReader.readDatabase().toMutableList()
-        val currentTasks = filterTasksByStatus(currentStatus, allTasks)
-        val adapter = TaskAdapter(currentTasks, this)
-        setupRecyclerView(adapter)
+        refreshData()
         actionsToMenu()
         actionToFAB()
     }
+
+    //Login
 
     private fun showNewTaskDialog() {
         val fm: FragmentManager = supportFragmentManager
@@ -129,13 +121,8 @@ class MainActivity : AppCompatActivity() {
         newTaskDialog.show(fm, "new_task_dialog")
     }
 
-    private fun loadTasks(): MutableList<RecyclerViewItem> {
+    private fun loadTasks(): MutableList<Task> {
         val tasks: List<Task> = SugarRecord.listAll(Task::class.java)
-        return tasks.toMutableList()
-    }
-
-    private fun loadAllManually(): MutableList<RecyclerViewItem> {
-        val tasks: List<Task> = SugarRecord.findWithQuery(Task::class.java,"")
         return tasks.toMutableList()
     }
 
@@ -155,7 +142,6 @@ class MainActivity : AppCompatActivity() {
                 .setInvalidatedByBiometricEnrollment(true)
                 .build()
         )
-
 
         executor = ContextCompat.getMainExecutor(context)
         biometricPrompt = BiometricPrompt(
@@ -195,10 +181,6 @@ class MainActivity : AppCompatActivity() {
                         .show()
                 }
             })
-
-
-
-
 
         promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Biometric login for my app")

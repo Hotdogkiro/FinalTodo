@@ -11,12 +11,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.R
-import com.example.todo_app.model.RecyclerViewItem
 import com.example.todo_app.model.Task
 import com.google.android.material.snackbar.Snackbar
 
 
-class TaskAdapter(private val tasksInCurrentList:  MutableList<RecyclerViewItem>, val mainActivity: MainActivity) :
+class TaskAdapter(private val tasksInCurrentList:  MutableList<Task>, val mainActivity: MainActivity) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     inner class ViewHolder(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
@@ -41,7 +40,7 @@ class TaskAdapter(private val tasksInCurrentList:  MutableList<RecyclerViewItem>
         showUndoSnackbar(mRecentlyDeletedItem, mRecentlyDeletedItemPosition)
     }
 
-    private fun showUndoSnackbar(mRecentlyDeletedItem : RecyclerViewItem, mRecentlyDeletedItemPosition : Int) {
+    private fun showUndoSnackbar(mRecentlyDeletedItem : Task, mRecentlyDeletedItemPosition : Int) {
         val view: View =  mainActivity.findViewById(R.id.coordinatorLayout)
         val snackbar: Snackbar = Snackbar.make(
             view, R.string.snack_bar_text,
@@ -51,7 +50,7 @@ class TaskAdapter(private val tasksInCurrentList:  MutableList<RecyclerViewItem>
         snackbar.show()
     }
 
-    private fun undoDelete(mRecentlyDeletedItem : RecyclerViewItem, mRecentlyDeletedItemPosition : Int) {
+    private fun undoDelete(mRecentlyDeletedItem : Task, mRecentlyDeletedItemPosition : Int) {
         tasksInCurrentList.add(
             mRecentlyDeletedItemPosition,
             mRecentlyDeletedItem
