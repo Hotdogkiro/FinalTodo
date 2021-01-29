@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.R
+import com.example.todo_app.data.DatabaseReader
 import com.example.todo_app.model.Importance
 import com.example.todo_app.model.RecyclerViewItem
 import com.example.todo_app.model.Status
@@ -25,6 +26,7 @@ import com.example.todo_app.model.Task
 import com.orm.SchemaGenerator
 import com.orm.SugarContext
 import com.orm.SugarDb
+import com.orm.SugarRecord
 import com.orm.SugarRecord.listAll
 import java.nio.charset.Charset
 import java.security.KeyStore
@@ -49,8 +51,8 @@ class MainActivity : AppCompatActivity() {
         SugarContext.init(this)
         val task = Task("Create New TODOs","Use the Icon on the bottom left to create new TODOs", Importance.MEDIUM)
         task.save()
-        setup(applicationContext, this)
-        //setupWithoutBiometric()
+        //setup(applicationContext, this)
+        setupWithoutBiometric()
     }
 
     private fun actionToFAB() {
@@ -111,7 +113,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun authenticationSuccessful(){
         setContentView(R.layout.activity_main)
-        allTasks = loadTasks()
+        allTasks = loadAllManually()
+        //val databaseReader = DatabaseReader(this)
+        //allTasks = databaseReader.readDatabase().toMutableList()
         val currentTasks = filterTasksByStatus(currentStatus, allTasks)
         val adapter = TaskAdapter(currentTasks, this)
         setupRecyclerView(adapter)
@@ -126,7 +130,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadTasks(): MutableList<RecyclerViewItem> {
-        val tasks: List<Task> = listAll(Task::class.java)
+        val tasks: List<Task> = SugarRecord.listAll(Task::class.java)
+        return tasks.toMutableList()
+    }
+
+    private fun loadAllManually(): MutableList<RecyclerViewItem> {
+        val tasks: List<Task> = SugarRecord.findWithQuery(Task::class.java,"")
         return tasks.toMutableList()
     }
 
