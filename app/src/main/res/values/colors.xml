@@ -9,4 +9,5 @@
     <color name="firstColorGradient">#03DAC5</color>
     <color name="lightGreen">#7DE95F</color>
     <color name="Green">#50E228</color>
+    <color name="lightGray">#fafafa</color>
 </resources>

@@ -17,10 +17,6 @@ public class DatabaseReader {
         SugarContext.init(context);
     }
 
-    public List<Task> readDatabase() {
-        return Task.listAll(Task.class);
-    }
-
     public List<Task> readTasksWithStatus(Status status) {
         return Task.findWithQuery(Task.class, "SELECT * FROM TASK WHERE STATUS = \"" + status.toString() + "\"");
     }

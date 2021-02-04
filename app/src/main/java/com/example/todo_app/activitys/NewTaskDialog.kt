@@ -10,6 +10,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
 import com.example.todo.R
 import com.example.todo_app.model.Importance
@@ -52,10 +53,17 @@ class NewTaskDialog : DialogFragment() {
         val description : String = view.findViewById<TextView>(R.id.descriptionForNewTask).text.toString()
         val title : String = view.findViewById<TextView>(R.id.titleForNewTask).text.toString()
         val task = Task(title,description,importance.toString(), Status.TODO.toString())
-        Log.d("test",title)
         task.save()
         mCallback.onSelectedData("save");
         this.dismiss()
+    }
+
+    override fun onResume() {
+        // Sets the height and the width of the DialogFragment
+        val width = ConstraintLayout.LayoutParams.MATCH_PARENT
+        val height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+        dialog?.window?.setLayout(width, height)
+        super.onResume()
     }
 
     override fun onAttach(activity: Activity) {

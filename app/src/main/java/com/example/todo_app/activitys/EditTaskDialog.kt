@@ -1,61 +1,93 @@
 package com.example.todo_app.activitys
 
-import android.graphics.Color
+import android.app.Activity
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.BackgroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.TextView
+import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
 import com.example.todo.R
+import com.example.todo_app.model.Importance
+import com.example.todo_app.model.Status
+import com.example.todo_app.model.Task
+import com.orm.SugarContext
 
 
 class EditTaskDialog : DialogFragment() {
+    private lateinit var mCallback: ISelectedData
+    private var taskId: Long? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.new_task_dialog, container)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        SugarContext.init(this.context)
+        arguments
+        taskId = arguments?.getLong("id", -1)
+        return inflater.inflate(R.layout.edit_task_dialog, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Get field from view
-        // mEditText = view.findViewById<View>(R.id.) as EditText
-        // Fetch arguments from bundle and set title
-        // val title = arguments!!.getString("title", "Enter Name")
-        // dialog!!.setTitle(title)
-        // Show soft keyboard automatically and request focus to field
-        // mEditText.requestFocus()
-        // dialog!!.window!!.setSoftInputMode(
-        //   WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
-        //)
+        setup(view)
     }
 
-
-    private fun setup() {
-        val lowString = SpannableString("LOW")
-        val mediumString = SpannableString("MEDIUM")
-        val highString = SpannableString("HIGH")
-        lowString.setSpan(BackgroundColorSpan(Color.WHITE), 0, 10, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        mediumString.setSpan(
-            BackgroundColorSpan(Color.WHITE),
-            0,
-            10,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        highString.setSpan(
-            BackgroundColorSpan(Color.WHITE),
-            0,
-            10,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
+    override fun onResume() {
+        // Sets the height and the width of the DialogFragment
+        val width = ConstraintLayout.LayoutParams.MATCH_PARENT
+        val height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+        dialog?.window?.setLayout(width, height)
+        super.onResume()
     }
 
+    private fun setup(view: View) {
+        val task = Task.findById(Task::class.java, taskId)
+        view.findViewById<TextView>(R.id.titleTask).text = task.title
+        view.findViewById<TextView>(R.id.descriptionTask).text = task.description
+        when (task.importance){
+            Importance.LOW -> view.findViewById<RadioGroup>(R.id.priorityTask).check(R.id.radioButtonLow)
+            Importance.MEDIUM -> view.findViewById<RadioGroup>(R.id.priorityTask).check(R.id.radioButtonMedium)
+            Importance.HIGH -> view.findViewById<RadioGroup>(R.id.priorityTask).check(R.id.radioButtonHigh)
+        }
+        when (task.status){
+            Status.TODO -> view.findViewById<RadioGroup>(R.id.statusTask).check(R.id.radioButtonTodo)
+            Status.INPROGRESS -> view.findViewById<RadioGroup>(R.id.statusTask).check(R.id.radioButtonProgress)
+            Status.DONE -> view.findViewById<RadioGroup>(R.id.statusTask).check(R.id.radioButtonDone)
+        }
+        val save = view.findViewById<View>(R.id.saveButton)
+        save.setOnClickListener {
+            checkForMissingInputs(view,task)
+        }
+    }
 
+    private fun checkForMissingInputs(view : View, task: Task){
+        if(view.findViewById<TextView>(R.id.titleTask).text.isEmpty()){
+            displayError()
+        }else{
+            saveNewTask(view, task)
+        }
+    }
+    private fun saveNewTask(view: View, task: Task) {
+        task.importance = enumValueOf(view.findViewById<RadioButton>(view.findViewById<RadioGroup>(R.id.priorityTask).checkedRadioButtonId).text.toString())
+        task.description = view.findViewById<TextView>(R.id.descriptionTask).text.toString()
+        task.title = view.findViewById<TextView>(R.id.titleTask).text.toString()
+        task.status = enumValueOf(view.findViewById<RadioButton>(view.findViewById<RadioGroup>(R.id.statusTask).checkedRadioButtonId).text.toString().replace("\\s".toRegex(), ""))
+        task.save()
+        mCallback.onSelectedData("save");
+        this.dismiss()
+    }
+
+    override fun onAttach(activity: Activity) {
+        super.onAttach(activity)
+        mCallback = activity as ISelectedData
+    }
+
+    private fun displayError(){
+        Toast.makeText(
+                context, "Please enter a Title",
+                Toast.LENGTH_SHORT
+        ).show()
+    }
 }
-

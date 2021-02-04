@@ -3,8 +3,6 @@ package com.example.todo_app.activitys
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -21,36 +19,34 @@ import com.example.todo.R
 import com.example.todo_app.data.DatabaseReader
 import com.example.todo_app.model.Status
 import com.example.todo_app.model.Task
+import com.journaldev.androidrecyclerviewswipetodelete.SwipeToDeleteCallback
 import com.orm.SugarContext
-import com.orm.SugarRecord
+import kotlinx.android.synthetic.main.recycler_fragment.*
 import java.nio.charset.Charset
-import java.security.KeyStore
 import java.util.*
 import java.util.concurrent.Executor
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
 
 
 interface ISelectedData {
     fun onSelectedData(string: String)
 }
 
-class MainActivity : AppCompatActivity(),ISelectedData  {
-    lateinit var allTasks: MutableList<Task>
+class MainActivity : AppCompatActivity(), ISelectedData  {
     var currentStatus: Status = Status.TODO
     private lateinit var executor: Executor
     private lateinit var biometricPrompt: BiometricPrompt
     private lateinit var promptInfo: BiometricPrompt.PromptInfo
     private lateinit var databaseReader: DatabaseReader
+    private lateinit var adapter: TaskAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.authentication_page)
         SugarContext.init(this)
         databaseReader = DatabaseReader(this)
-        //setup(applicationContext, this)
-        setupWithoutBiometric()
+        actionToSignInButton()
+        setup(applicationContext, this)
+        //setupWithoutBiometric()
     }
 
     override fun onSelectedData(returnValue: String) {
@@ -61,6 +57,13 @@ class MainActivity : AppCompatActivity(),ISelectedData  {
         val FAB = findViewById<View>(R.id.floatingActionButton)
         FAB.setOnClickListener {
             showNewTaskDialog()
+        }
+    }
+
+    private fun actionToSignInButton() {
+        val signIn = findViewById<View>(R.id.signInButton)
+        signIn.setOnClickListener {
+            signIn()
         }
     }
 
@@ -92,18 +95,17 @@ class MainActivity : AppCompatActivity(),ISelectedData  {
         done.setOnClickListener(onClickListener)
     }
 
-    private fun setupRecyclerView(adapter: TaskAdapter) {
+    private fun setupRecyclerView() {
         val recyclerView = findViewById<View>(R.id.recyclerView) as RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
-        val itemTouchHelper = ItemTouchHelper(SwipeToDeleteCallback(adapter));
-        itemTouchHelper.attachToRecyclerView(recyclerView)
+        enableSwipeToDeleteAndUndo()
     }
 
     private fun refreshData(){
         val currentTasks = databaseReader.readTasksWithStatus(currentStatus)
-        val adapter = TaskAdapter(currentTasks, this)
-        setupRecyclerView(adapter)
+        adapter = TaskAdapter(currentTasks, this)
+        setupRecyclerView()
     }
 
     private fun authenticationSuccessful(){
@@ -113,36 +115,37 @@ class MainActivity : AppCompatActivity(),ISelectedData  {
         actionToFAB()
     }
 
-    //Login
-
     private fun showNewTaskDialog() {
         val fm: FragmentManager = supportFragmentManager
         val newTaskDialog = NewTaskDialog()
         newTaskDialog.show(fm, "new_task_dialog")
     }
 
-    private fun loadTasks(): MutableList<Task> {
-        val tasks: List<Task> = SugarRecord.listAll(Task::class.java)
-        return tasks.toMutableList()
+    private fun enableSwipeToDeleteAndUndo() {
+        val swipeToDeleteCallback: SwipeToDeleteCallback = object : SwipeToDeleteCallback(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, i: Int) {
+                val position = viewHolder.adapterPosition
+                val item: Task = adapter.getData()[position]
+                adapter.removeItem(position)
+                item.delete()
+            }
+        }
+        val itemTouchhelper = ItemTouchHelper(swipeToDeleteCallback)
+        itemTouchhelper.attachToRecyclerView(recyclerView)
     }
+
+    //Login
+
+   //private fun loadTasks(): MutableList<Task> {
+    //    val tasks: List<Task> = SugarRecord.listAll(Task::class.java)
+    //    return tasks.toMutableList()
+    //}
 
     private fun setupWithoutBiometric(){
         authenticationSuccessful()
     }
 
     private fun setup(context: Context, fragment: FragmentActivity) {
-        generateSecretKey(
-            KeyGenParameterSpec.Builder(
-                "saveKey",
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-            )
-                .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
-                .setUserAuthenticationRequired(true)
-                .setInvalidatedByBiometricEnrollment(true)
-                .build()
-        )
-
         executor = ContextCompat.getMainExecutor(context)
         biometricPrompt = BiometricPrompt(
             fragment, executor,
@@ -181,44 +184,15 @@ class MainActivity : AppCompatActivity(),ISelectedData  {
                         .show()
                 }
             })
+    }
 
+    private fun signIn(){
         promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Biometric login for my app")
-            .setSubtitle("Log in using your biometric credential")
-            .setNegativeButtonText("Cancel")
-            .build()
+                .setTitle("Biometric login for my app")
+                .setSubtitle("Log in using your biometric credential")
+                .setNegativeButtonText("Cancel")
+                .build()
 
-
-        val cipher = getCipher()
-        val secretKey = getSecretKey()
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-        biometricPrompt.authenticate(
-            promptInfo,
-            BiometricPrompt.CryptoObject(cipher)
-        )
-    }
-
-    private fun generateSecretKey(keyGenParameterSpec: KeyGenParameterSpec) {
-        val keyGenerator = KeyGenerator.getInstance(
-            KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore"
-        )
-        keyGenerator.init(keyGenParameterSpec)
-        keyGenerator.generateKey()
-    }
-
-    private fun getSecretKey(): SecretKey {
-        val keyStore = KeyStore.getInstance("AndroidKeyStore")
-
-        // Before the keystore can be accessed, it must be loaded.
-        keyStore.load(null)
-        return keyStore.getKey("saveKey", null) as SecretKey
-    }
-
-    private fun getCipher(): Cipher {
-        return Cipher.getInstance(
-            KeyProperties.KEY_ALGORITHM_AES + "/"
-                    + KeyProperties.BLOCK_MODE_CBC + "/"
-                    + KeyProperties.ENCRYPTION_PADDING_PKCS7
-        )
+        biometricPrompt.authenticate(promptInfo)
     }
 }
