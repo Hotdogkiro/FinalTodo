@@ -17,7 +17,6 @@ import com.orm.SugarContext
 
 class TaskAdapter(private val tasksInCurrentList:  MutableList<Task>, val mainActivity: MainActivity) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    //var position : Int = 0
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val title = itemView.findViewById<TextView>(R.id.title)
@@ -28,14 +27,13 @@ class TaskAdapter(private val tasksInCurrentList:  MutableList<Task>, val mainAc
                 val fm: FragmentManager = mainActivity.supportFragmentManager
                 val editTaskDialog = EditTaskDialog()
                 val b = Bundle()
+                //passing arguments to fragment
                 b.putLong("id", getId(layoutPosition))
                 editTaskDialog.arguments = b
                 editTaskDialog.show(fm, "edit_task_dialog")
             }
         }
-
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         var view: View
@@ -55,6 +53,7 @@ class TaskAdapter(private val tasksInCurrentList:  MutableList<Task>, val mainAc
         titleView.text = task.title
         description.text = task.description
         when (task.importance) {
+            // alternate design
             /*Importance.LOW -> background.setBackgroundResource(R.drawable.stripesgreensmall)
             Importance.MEDIUM -> background.setBackgroundResource(R.drawable.stripesorangesmall)
             Importance.HIGH -> background.setBackgroundResource(R.drawable.stripesredsmall)*/
@@ -72,11 +71,6 @@ class TaskAdapter(private val tasksInCurrentList:  MutableList<Task>, val mainAc
     fun removeItem(position: Int) {
         tasksInCurrentList.removeAt(position)
         notifyItemRemoved(position)
-    }
-
-    fun addItem(task: Task) {
-        val pos = tasksInCurrentList.add(task)
-        notifyItemInserted(itemCount)
     }
 
     fun getData(): MutableList<Task> {

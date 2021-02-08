@@ -2,7 +2,6 @@ package com.example.todo_app.activitys
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,6 +53,7 @@ class NewTaskDialog : DialogFragment() {
         val title : String = view.findViewById<TextView>(R.id.titleForNewTask).text.toString()
         val task = Task(title,description,importance.toString(), Status.TODO.toString())
         task.save()
+        // Callback to tell the MainActivity to reload the data because there is a new task
         mCallback.onSelectedData("save");
         this.dismiss()
     }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.util.Range
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.R
 import com.example.todo_app.data.DatabaseReader
+import com.example.todo_app.model.Importance
 import com.example.todo_app.model.Status
 import com.example.todo_app.model.Task
 import com.journaldev.androidrecyclerviewswipetodelete.SwipeToDeleteCallback
@@ -26,7 +28,7 @@ import java.nio.charset.Charset
 import java.util.*
 import java.util.concurrent.Executor
 
-
+//Interface to get notification on Data changed
 interface ISelectedData {
     fun onSelectedData(string: String)
 }
@@ -45,6 +47,7 @@ class MainActivity : AppCompatActivity(), ISelectedData  {
         SugarContext.init(this)
         databaseReader = DatabaseReader(this)
         actionToSignInButton()
+        //createTasks(20)
         setup(applicationContext, this)
         //setupWithoutBiometric()
     }
@@ -130,16 +133,11 @@ class MainActivity : AppCompatActivity(), ISelectedData  {
                 item.delete()
             }
         }
-        val itemTouchhelper = ItemTouchHelper(swipeToDeleteCallback)
-        itemTouchhelper.attachToRecyclerView(recyclerView)
+        val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
     //Login
-
-   //private fun loadTasks(): MutableList<Task> {
-    //    val tasks: List<Task> = SugarRecord.listAll(Task::class.java)
-    //    return tasks.toMutableList()
-    //}
 
     private fun setupWithoutBiometric(){
         authenticationSuccessful()
@@ -184,6 +182,7 @@ class MainActivity : AppCompatActivity(), ISelectedData  {
                         .show()
                 }
             })
+        signIn()
     }
 
     private fun signIn(){
@@ -194,5 +193,19 @@ class MainActivity : AppCompatActivity(), ISelectedData  {
                 .build()
 
         biometricPrompt.authenticate(promptInfo)
+    }
+
+    //Test Data
+
+    private fun createTasks(amount: Int){
+        createTasks(amount, Status.TODO)
+        createTasks(amount, Status.INPROGRESS)
+        createTasks(amount, Status.DONE)
+    }
+
+    private fun createTasks(amount : Int, status: Status){
+        for(i in 1..amount){
+            Task("This is Todo nr. $i","This Todo is for test purposes", Importance.LOW.toString(), status.toString()).save()
+        }
     }
 }

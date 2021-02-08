@@ -1,13 +1,9 @@
 package com.example.todo_app.data;
 
 import android.content.Context;
-
 import com.example.todo_app.model.Status;
 import com.orm.SugarContext;
-import com.orm.SugarRecord;
 import com.example.todo_app.model.Task;
-
-import java.util.Collections;
 import java.util.List;
 
 public class DatabaseReader {

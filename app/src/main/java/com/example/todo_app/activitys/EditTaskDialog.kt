@@ -24,7 +24,7 @@ class EditTaskDialog : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         SugarContext.init(this.context)
-        arguments
+        // Get task id from arguments to get Task from the database
         taskId = arguments?.getLong("id", -1)
         return inflater.inflate(R.layout.edit_task_dialog, container)
     }
@@ -43,6 +43,7 @@ class EditTaskDialog : DialogFragment() {
     }
 
     private fun setup(view: View) {
+        // Set values of the Edit Task Dialog
         val task = Task.findById(Task::class.java, taskId)
         view.findViewById<TextView>(R.id.titleTask).text = task.title
         view.findViewById<TextView>(R.id.descriptionTask).text = task.description
